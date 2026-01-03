@@ -11,23 +11,20 @@ import java.util.concurrent.TimeUnit;
 @Mixin(InputUtil.class)
 public class InputUtilMixin { //69696969696969 jubert to nooooobek
     @Inject(at = @At(value = "HEAD"), method = "isKeyPressed", cancellable = true)
-    private static void isKeyPressed(long window, int code, CallbackInfoReturnable<Boolean> cir) {
-        if(code != 341) return;
+	private static void isKeyPressed(long window, int code, CallbackInfoReturnable<Boolean> cir) {
+		if (code != 341) return;
 
-        if(!FixAltGrClient.listener.controlKeyPressed || FixAltGrClient.listener.altKeyPressed)
+		if (!FixAltGrClient.listener.controlKeyPressed || FixAltGrClient.listener.altKeyPressed) {
 			cir.setReturnValue(false);
-        else {
-            try {
-                TimeUnit.MILLISECONDS.sleep(FixAltGrClient.axiomLoaded ? 0 : 10);
-            }
-			catch (InterruptedException e) {
-				FixAltGrClient.LOGGER.error("The isKeyPressed sleep was interrupted!");
-            }
+			return;
+		}
 
-            if (!FixAltGrClient.listener.controlKeyPressed || FixAltGrClient.listener.altKeyPressed)
-				cir.setReturnValue(false);
-            else
-                cir.setReturnValue(true);
-        }
-    }
+		if (FixAltGrClient.axiomLoaded) return;
+
+		long timeSinceChange = System.currentTimeMillis() - FixAltGrClient.listener.lastStateChangeTime;
+
+		if (timeSinceChange < 10) {
+			cir.setReturnValue(false);
+		}
+	}
 }
